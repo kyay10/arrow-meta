@@ -93,7 +93,8 @@ interface ConfigSyntax {
     listOf(this, other)
 
   private fun prelude(currentVersion: String?): Dependency =
-    Dependency("prelude:$currentVersion")
+          // Since the prelude is now multiplatform, we need to specifically say that we depend on the jvm version
+    Dependency("prelude-jvm:$currentVersion")
 
   /**
    * Simplifies the configuration with a default configuration: Arrow Meta Compiler Plugin + Arrow Annotations as

@@ -1,22 +1,62 @@
-apply plugin: 'kotlin'
-
-dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_VERSION"
+plugins {
+    id 'org.jetbrains.kotlin.multiplatform'
 }
 
-compileKotlin {
-    kotlinOptions {
-        freeCompilerArgs = ["-XXLanguage:+InlineClasses"]
-        jvmTarget = "1.8"
+kotlin {
+    jvm {
+        compilations.all {
+            kotlinOptions.jvmTarget = '1.8'
+        }
+    }
+    js()
+    def hostOs = System.getProperty('os.name')
+    def isMingwX64 = hostOs.startsWith('Windows')
+    if (hostOs == 'Mac OS X') {
+        macosX64('native')
+    } else if (hostOs == 'Linux') {
+        linuxX64('native')
+    } else if (isMingwX64) {
+        mingwX64('native')
+    } else {
+        throw GradleException('Host OS is not supported in Kotlin/Native.')
+    }
+
+    sourceSets {
+        all {
+            languageSettings.enableLanguageFeature('InlineClasses')
+        }
+        commonMain {
+            dependencies {
+                implementation(kotlin('stdlib'))
+            }
+        }
+        commonTest {
+            dependencies {
+                implementation(kotlin('test-common'))
+                implementation(kotlin('test-annotations-common'))
+            }
+        }
+        jvmMain {}
+        jvmTest {
+            dependencies {
+                implementation(kotlin('test-junit'))
+            }
+        }
+        jsMain {
+            dependencies {
+                implementation(kotlin('stdlib-js'))
+            }
+        }
+        nativeMain {}
+        nativeTest {}
     }
 }
-
 jar {
     manifest {
-        attributes["Specification-Title"] = project.name
-        attributes["Specification-Version"] = project.version
-        attributes["Implementation-Title"] = "arrow.meta.prelude"
-        attributes["Implementation-Version"] = project.version
+        attributes['Specification-Title'] = project.name
+        attributes['Specification-Version'] = project.version
+        attributes['Implementation-Title'] = 'arrow.meta.prelude'
+        attributes['Implementation-Version'] = project.version
     }
 }
 
